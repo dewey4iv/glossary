@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/GoRethink/gorethink/encoding"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -73,13 +74,18 @@ func (ann *Glossary) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+var _ encoding.Marshaler = (*Glossary)(nil)
+var _ encoding.Unmarshaler = (*Glossary)(nil)
+
 // MarshalRQL implements gorethink.RQLMarshaler
-func (ann *Glossary) MarshalRQL() (interface{}, error) {
-	if ann == nil {
-		return []byte{}, nil
-	}
+func (ann Glossary) MarshalRQL() (interface{}, error) {
 	var m map[string]interface{}
-	if err := json.Unmarshal(*ann, &m); err != nil {
+
+	if ann == nil {
+		return m, nil
+	}
+
+	if err := json.Unmarshal(ann, &m); err != nil {
 		return nil, err
 	}
 
